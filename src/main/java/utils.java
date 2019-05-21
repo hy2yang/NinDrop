@@ -4,6 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import spark.Request;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Scanner;
 
 public class utils {
@@ -46,30 +50,20 @@ public class utils {
     }
 
     static void openBrowser(String url){
-
-        String os = System.getProperty("os.name").toLowerCase();
-        Runtime rt = Runtime.getRuntime();
-
-        try{
-            if (os.indexOf( "win" ) >= 0) {
-                rt.exec( "rundll32 url.dll,FileProtocolHandler " + url);
-            } else if (os.indexOf( "mac" ) >= 0) {
-                rt.exec( "open " + url);
-            } else if (os.indexOf( "nix") >=0 || os.indexOf( "nux") >=0) {
-                String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
-                        "netscape","opera","links","lynx"};
-                StringBuilder cmd = new StringBuilder();
-                for (int i=0; i<browsers.length; i++)
-                    cmd.append( (i==0  ? "" : " || " ) + browsers[i] +" \"" + url + "\" ");
-
-                rt.exec(new String[] { "sh", "-c", cmd.toString() });
-
-            } else {
-                return;
+        if(Desktop.isDesktopSupported()){
+            Desktop desktop = Desktop.getDesktop();
+            try {
+                desktop.browse(new URI(url));
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
             }
-        }catch (Exception e){
-            System.out.println("fail to start browser, please open "+url+" manually");
-            return;
+        }else{
+            Runtime runtime = Runtime.getRuntime();
+            try {
+                runtime.exec("xdg-open " + url);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
