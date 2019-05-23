@@ -1,6 +1,9 @@
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import spark.Request;
 
@@ -8,9 +11,11 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
-public class utils {
+public class Utils {
     static ObjectMapper mapper;
     private static final int DEFAULT_PORT = 10233;
     static {
@@ -65,6 +70,39 @@ public class utils {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static String getStringFromHex(String hex) {
+        if ( (hex.length()&1) != 0) {
+            System.out.println((hex.length()&1) + " " + hex);
+            //System.out.println(hex.length() % 2 + " " + hex);
+            return "";
+        } else {
+            String result = "";
+            for (int i = 0; i < hex.length(); i += 2) {
+                String hexPair = hex.substring(i, i + 2);
+                if (!hexPair.equals("00")) {
+                    char newChar = (char) getIntFromHex(hexPair);
+                    result = result + String.valueOf(newChar);
+                }
+            }
+            return result;
+        }
+    }
+
+    public static int getIntFromHex(String hex) {
+        if (!hex.startsWith("0x")) {
+            return Integer.decode("0x" + hex);
+        } else {
+            return Integer.decode(hex);
+        }
+    }
+
+    public static Map<String,Object> getMapFromJSON(String json)
+            throws IOException {
+        HashMap<String,Object> bodyMap = new HashMap<>();
+        mapper.readValue(json, new TypeReference<HashMap<String,Object>>() {});
+        return bodyMap;
     }
 
 
