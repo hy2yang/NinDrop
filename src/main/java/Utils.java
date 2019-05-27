@@ -1,14 +1,15 @@
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import spark.Request;
 
 import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -18,6 +19,11 @@ import java.util.Scanner;
 public class Utils {
     static ObjectMapper mapper;
     private static final int DEFAULT_PORT = 10233;
+    private static final String CTR = "4354522D";
+    private static final String GUION = "2D";
+    private static final String NCCH = "4E434348";
+
+
     static {
         mapper = new ObjectMapper();
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
@@ -72,7 +78,7 @@ public class Utils {
         }
     }
 
-    public static String getStringFromHex(String hex) {
+    private static String getStringFromHex(String hex) {
         if ( (hex.length()&1) != 0) {
             System.out.println((hex.length()&1) + " " + hex);
             //System.out.println(hex.length() % 2 + " " + hex);
@@ -90,7 +96,52 @@ public class Utils {
         }
     }
 
-    public static int getIntFromHex(String hex) {
+    static String getSerialFromRom(File file){
+        String serial = "";
+
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(file, "r");
+            raf.seek(0x3000);
+            StringBuilder search = new StringBuilder();
+            for (int i = 0; i < 0x1000; i++) {
+                int part = raf.readByte();
+                if (part < 0) part = part & 0xff;
+                String hexPart = Integer.toHexString(part).toUpperCase();
+                if (hexPart.length() == 1) {
+                    hexPart = "0" + hexPart;
+                }
+                search.append(hexPart);
+            }
+            serial = findSerial(search.toString());
+
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return serial;
+    }
+
+    private static String findSerial(String searchBlock) {
+        int start = searchBlock.indexOf(NCCH);
+        String CTRBlock = searchBlock.substring(start + (0x50 * 2), start + (0x50 * 2) + (0x0A * 2));
+        if (CTRBlock.startsWith(CTR) && CTRBlock.substring(10, 12).equals(GUION)) {
+            return getStringFromHex(CTRBlock).split("-")[2];
+        }
+
+        return "";
+    }
+
+    private static int getIntFromHex(String hex) {
         if (!hex.startsWith("0x")) {
             return Integer.decode("0x" + hex);
         } else {

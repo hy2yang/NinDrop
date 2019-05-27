@@ -8,18 +8,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class RomInfoFinder {
+class RomInfoFinder {
 
     private HashMap<String, RomInfo> db;
-    private SAXParser parser;
+    private static final String PATH_TO_XML = "3dstdb.xml";
 
-    private DefaultHandler romXMLHandler = new RomXMLHandler(this::addToDB);
+    RomInfoFinder(){
+        new RomInfoFinder(new File(PATH_TO_XML));
+    }
 
     RomInfoFinder(File dbxml){
         db = new HashMap<>();
         try {
-            this.parser = SAXParserFactory.newInstance().newSAXParser();
-            parser.parse(dbxml,romXMLHandler);
+            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+            DefaultHandler romXMLHandler = new RomXMLHandler(this::addToDB);
+            parser.parse(dbxml, romXMLHandler);
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {

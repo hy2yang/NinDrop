@@ -29,7 +29,7 @@ public class WebSocketPunch {
         get("/punch", (req, res)->{
             preprocess(req);
             punchService.startAllInQueue();
-            return "main page of websocketpunch";
+            return "scheduled to start all ready tasks";
         });
 
         //add to queue
@@ -45,20 +45,20 @@ public class WebSocketPunch {
         get("/queue", (req,res)->{
             preprocess(req);
 
-            return Utils.getJson(punchService.getAll());
+            return Utils.getJson(punchService.getAllTasks());
         });
 
         // delete queue item
         delete("/queue/:index", (req,res)->{
             preprocess(req);
-            punchService.deleteAt(Integer.parseInt(req.params("index")));
-            return "main page of websocketpunch";
+            punchService.deleteAt(Integer.parseInt(req.params(":index")));
+            return Utils.getJson(punchService.getAllTasks());
         });
 
         // item detail
         get("/queue/:index", (req,res)->{
             preprocess(req);
-            PunchTask task = punchService.getInfoOf(Integer.parseInt(req.params("index")));
+            PunchTask task = punchService.getInfoOf(Integer.parseInt(req.params(":index")));
             return Utils.getJson(task);
         });
 
@@ -66,8 +66,7 @@ public class WebSocketPunch {
         get("/queue/:index/status", (req,res)->{
             preprocess(req);
             //TODO
-            //punchService.ge
-            return "main page of websocketpunch";
+            return punchService.getStatusOf(Integer.parseInt(req.params(":index")));
         });
 
         // transmission progress
@@ -80,7 +79,7 @@ public class WebSocketPunch {
         //empty queue
         delete("/queue", (req,res)->{
             punchService.emptyQueue();
-            return "main page of websocketpunch";
+            return Utils.getJson(punchService.getAllTasks());
         });
 
 
