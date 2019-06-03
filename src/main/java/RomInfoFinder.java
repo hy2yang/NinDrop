@@ -14,7 +14,7 @@ class RomInfoFinder {
     private static final String PATH_TO_XML = "3dstdb.xml";
 
     RomInfoFinder(){
-        new RomInfoFinder(new File(PATH_TO_XML));
+        this(new File(PATH_TO_XML));
     }
 
     RomInfoFinder(File dbxml){
@@ -30,10 +30,12 @@ class RomInfoFinder {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     RomInfo getRomInfoBySerial(String romSerial){
-        return db.get(romSerial);
+        if (db.containsKey(romSerial)) return db.get(romSerial);
+        return null;
     }
     RomInfo addToDB(String serial, RomInfo romInfo){
         return this.db.put(serial,romInfo);

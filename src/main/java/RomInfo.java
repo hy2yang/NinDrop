@@ -1,13 +1,11 @@
 public class RomInfo {
 
-    //private final String titleId;
     private final String serial;
     private final String region;
     private final String languages;
     private final String name;
 
-    RomInfo(/*String tid,*/ String se, String re, String lan, String n){
-        //this.titleId = tid;
+    RomInfo(String se, String re, String lan, String n){
         this.serial = se;
         this.region = re;
         this.languages = lan;

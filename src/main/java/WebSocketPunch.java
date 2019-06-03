@@ -1,22 +1,36 @@
 import spark.Request;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static spark.Spark.*;
 
 public class WebSocketPunch {
 
     private static final PunchService punchService = new PunchService();
+    private static final int DEFAULT_PORT = 10234;
+    static final String KEY_3DS_IP = "3dsIP";
+    static final String KEY_LEGACY = "legacyWay";
+    static final String KEY_BUFFER = "bufferSize";
 
     public static void main(String[] arg){
-        final int pnum = Utils.getPortFromKeyboard();
-        port(pnum);
+        //final int pnum = Utils.getPortFromKeyboard();
+        port(DEFAULT_PORT);
+        System.out.println();
         startWebService();
-        Utils.openBrowser("http://localhost:"+pnum);
+        Utils.openBrowser("http://localhost:"+DEFAULT_PORT);
     }
 
     private static void startWebService(){
 
         after((req, res) -> {
             res.type("application/json");
+        });
+
+        get("/shutdown", (req, res) -> {
+            punchService.shutdown();
+            System.exit(0);
+            return null;
         });
 
         //main page ui
@@ -28,6 +42,11 @@ public class WebSocketPunch {
         //start punch, mode/socket/buffer size as query param
         get("/punch", (req, res)->{
             preprocess(req);
+            Map<String, String> pMap = new HashMap<>();
+            pMap.put(KEY_3DS_IP, req.queryParams(KEY_3DS_IP));
+            pMap.put(KEY_LEGACY, req.queryParams(KEY_LEGACY));
+            pMap.put(KEY_BUFFER, req.queryParams(KEY_BUFFER));
+            punchService.setParams(pMap);
             punchService.startAllInQueue();
             return "scheduled to start all ready tasks";
         });
@@ -36,15 +55,12 @@ public class WebSocketPunch {
         post("/queue",(req, res)->{
             preprocess(req);
             String romURL = req.queryParams("romURL");
-            //Map<String, Object> bodyMap = Utils.getMapFromJSON(req.body());
-            System.out.println(romURL);
             punchService.addToQueue(romURL);
             return "main page of websocketpunch";
         });
 
         get("/queue", (req,res)->{
             preprocess(req);
-
             return Utils.getJson(punchService.getAllTasks());
         });
 
