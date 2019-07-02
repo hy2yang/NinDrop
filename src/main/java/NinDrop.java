@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static spark.Spark.*;
 
-public class WebSocketPunch {
+public class NinDrop {
 
     private static final PunchService punchService = new PunchService();
 
