@@ -1,3 +1,10 @@
+package Service;
+
+import Model.DetailedRom;
+import Model.TaskStatus;
+import Utils.BackConfig;
+
+
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -8,13 +15,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class PunchService {
+public class PunchService {
 
     private final List<PunchTask> queue;
     private final AtomicInteger index;
     private final ExecutorService puncher = Executors.newSingleThreadExecutor();
 
-    private final int PORT_3DS = 5000;
     private String IP_3DS = "0.0.0.0";
     private boolean legacyWay = true;
     private int bufferSize = 256;
@@ -27,24 +33,24 @@ class PunchService {
     private long startTime;
     private long endTime;
 
-    PunchService(){
+    public PunchService(){
         this.queue = new ArrayList<>();
         this.index = new AtomicInteger(0);
     }
 
-    void setParams(Map<String, String> pMap){
-        if (pMap.get(WebSocketPunch.KEY_LEGACY) != null){
-            legacyWay = Boolean.parseBoolean(pMap.get(WebSocketPunch.KEY_LEGACY));
+    public void setParams(Map<String, String> pMap){
+        if (pMap.get(BackConfig.KEY_LEGACY) != null){
+            legacyWay = Boolean.parseBoolean(pMap.get(BackConfig.KEY_LEGACY));
         }
-        if (pMap.get(WebSocketPunch.KEY_BUFFER) != null){
-            bufferSize = Integer.parseInt(pMap.get(WebSocketPunch.KEY_BUFFER));
+        if (pMap.get(BackConfig.KEY_BUFFER) != null){
+            bufferSize = Integer.parseInt(pMap.get(BackConfig.KEY_BUFFER));
         }
-        if (pMap.get(WebSocketPunch.KEY_3DS_IP) != null){
-            IP_3DS = pMap.get(WebSocketPunch.KEY_3DS_IP);
+        if (pMap.get(BackConfig.KEY_3DS_IP) != null){
+            IP_3DS = pMap.get(BackConfig.KEY_3DS_IP);
         }
     }
 
-    synchronized void startAllInQueue(){
+    public synchronized void startAllInQueue(){
         if (legacyWay){
             startAllLegacy();
         }
@@ -70,8 +76,8 @@ class PunchService {
                 if (index.get()>=queue.size()) break;
                 cur = queue.get(index.get());
                 if (cur != null){
-                    while(cur.getStatus()!=TaskStatus.READY){
-                        cur.prepareStuff(IP_3DS, PORT_3DS, bufferSize);
+                    while(cur.getStatus()!= TaskStatus.READY){
+                        cur.prepareStuff(IP_3DS, BackConfig.PORT_3DS, bufferSize);
                     }
                     puncher.execute(cur);
                     index.getAndIncrement();
@@ -115,7 +121,7 @@ class PunchService {
 
     private boolean prepareForNew(){
         try{
-            this.socket = new Socket(IP_3DS, PORT_3DS);
+            this.socket = new Socket(IP_3DS, BackConfig.PORT_3DS);
             //socket.setKeepAlive(true);
             this.out = new DataOutputStream(socket.getOutputStream());
             this.bos = new BufferedOutputStream(out, bufferSize);
@@ -128,14 +134,14 @@ class PunchService {
         return false;
     }
 
-    void emptyQueue(){
+    public void emptyQueue(){
         synchronized (queue) {
             this.queue.clear();
             index.set(0);
         }
     }
 
-    boolean addToQueue(String romURL) {
+    public boolean addToQueue(String romURL) {
         File rom = new File(romURL);
         PunchTask tr = new PunchTask(new DetailedRom(rom));
         if (tr.getStatus() == TaskStatus.INIT) {
@@ -146,7 +152,7 @@ class PunchService {
         return false;
     }
 
-    boolean deleteAt(int i){
+    public boolean deleteAt(int i){
         checkIndex(i);
         PunchTask tr;
 
@@ -162,18 +168,18 @@ class PunchService {
         return true;
     }
 
-    List<PunchTask> getAllTasks(){
+    public List<PunchTask> getAllTasks(){
         return new ArrayList<>(this.queue);
     }
 
-    PunchTask getInfoOf(int i){
+    public PunchTask getInfoOf(int i){
         checkIndex(i);
         synchronized (queue){
             return queue.get(i);
         }
     }
 
-    TaskStatus getStatusOf(int i){
+    public TaskStatus getStatusOf(int i){
         checkIndex(i);
         return queue.get(i).getStatus();
     }

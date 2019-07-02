@@ -1,3 +1,8 @@
+package Service;
+
+import Model.DetailedRom;
+import Model.TaskStatus;
+import Utils.AppUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.*;
@@ -63,7 +68,7 @@ public class PunchTask implements Runnable{
         Map<String, Long> temp = new HashMap<>();
         temp.put("size", this.detailedRom.getFile().length());
         temp.put("transferred", getTransferred());
-        return Utils.getJson(temp);
+        return AppUtils.getJson(temp);
     }
 
 

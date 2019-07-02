@@ -1,3 +1,6 @@
+package Utils;
+
+import Model.RomInfo;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 

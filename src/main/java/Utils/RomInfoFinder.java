@@ -1,3 +1,6 @@
+package Utils;
+
+import Model.RomInfo;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -8,16 +11,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-class RomInfoFinder {
+public class RomInfoFinder {
 
     private HashMap<String, RomInfo> db;
     private static final String PATH_TO_XML = "3dstdb.xml";
 
-    RomInfoFinder(){
+    public RomInfoFinder(){
         this(new File(PATH_TO_XML));
     }
 
-    RomInfoFinder(File dbxml){
+    public RomInfoFinder(File dbxml){
         db = new HashMap<>();
         try {
             SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
@@ -33,7 +36,7 @@ class RomInfoFinder {
 
     }
 
-    RomInfo getRomInfoBySerial(String romSerial){
+    public RomInfo getRomInfoBySerial(String romSerial){
         if (db.containsKey(romSerial)) return db.get(romSerial);
         return null;
     }

@@ -1,3 +1,7 @@
+import Service.PunchService;
+import Service.PunchTask;
+import Utils.AppUtils;
+import Utils.BackConfig;
 import spark.Request;
 
 import java.util.HashMap;
@@ -8,17 +12,15 @@ import static spark.Spark.*;
 public class WebSocketPunch {
 
     private static final PunchService punchService = new PunchService();
-    private static final int DEFAULT_PORT = 10234;
-    static final String KEY_3DS_IP = "3dsIP";
-    static final String KEY_LEGACY = "legacyWay";
-    static final String KEY_BUFFER = "bufferSize";
+
 
     public static void main(String[] arg){
-        //final int pnum = Utils.getPortFromKeyboard();
-        port(DEFAULT_PORT);
+        //final int pnum = AppUtils.AppUtils.getPortFromKeyboard();
+        //port(pnum);
+        port(BackConfig.DEFAULT_PORT);
         System.out.println();
         startWebService();
-        Utils.openBrowser("http://localhost:"+DEFAULT_PORT);
+        AppUtils.openBrowser("http://localhost:"+ BackConfig.DEFAULT_PORT);
     }
 
     private static void startWebService(){
@@ -43,9 +45,9 @@ public class WebSocketPunch {
         get("/punch", (req, res)->{
             preprocess(req);
             Map<String, String> pMap = new HashMap<>();
-            pMap.put(KEY_3DS_IP, req.queryParams(KEY_3DS_IP));
-            pMap.put(KEY_LEGACY, req.queryParams(KEY_LEGACY));
-            pMap.put(KEY_BUFFER, req.queryParams(KEY_BUFFER));
+            pMap.put(BackConfig.KEY_3DS_IP, req.queryParams(BackConfig.KEY_3DS_IP));
+            pMap.put(BackConfig.KEY_LEGACY, req.queryParams(BackConfig.KEY_LEGACY));
+            pMap.put(BackConfig.KEY_BUFFER, req.queryParams(BackConfig.KEY_BUFFER));
             punchService.setParams(pMap);
             punchService.startAllInQueue();
             return "scheduled to start all ready tasks";
@@ -56,26 +58,26 @@ public class WebSocketPunch {
             preprocess(req);
             String romURL = req.queryParams("romURL");
             punchService.addToQueue(romURL);
-            return "main page of websocketpunch";
+            return "file added to queue";
         });
 
         get("/queue", (req,res)->{
             preprocess(req);
-            return Utils.getJson(punchService.getAllTasks());
+            return AppUtils.getJson(punchService.getAllTasks());
         });
 
         // delete queue item
         delete("/queue/:index", (req,res)->{
             preprocess(req);
             punchService.deleteAt(Integer.parseInt(req.params(":index")));
-            return Utils.getJson(punchService.getAllTasks());
+            return AppUtils.getJson(punchService.getAllTasks());
         });
 
         // item detail
         get("/queue/:index", (req,res)->{
             preprocess(req);
             PunchTask task = punchService.getInfoOf(Integer.parseInt(req.params(":index")));
-            return Utils.getJson(task);
+            return AppUtils.getJson(task);
         });
 
         // item status
@@ -89,25 +91,25 @@ public class WebSocketPunch {
         get("/queue/:index/progress", (req,res)->{
             preprocess(req);
             //TODO
-            return "main page of websocketpunch";
+            return "return trnsmitting progress";
         });
 
         //empty queue
         delete("/queue", (req,res)->{
             punchService.emptyQueue();
-            return Utils.getJson(punchService.getAllTasks());
+            return AppUtils.getJson(punchService.getAllTasks());
         });
 
 
         //update config
         put("/config", (req,res)->{
             //TODO
-            return "main page of websocketpunch";
+            return "config update success";
         });
     }
 
     private static void preprocess(Request req){
-        Utils.printReqDetails(req);
+        AppUtils.printReqDetails(req);
     }
 
 

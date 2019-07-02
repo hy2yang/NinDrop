@@ -1,3 +1,5 @@
+package Model;
+
 public class RomInfo {
 
     private final String serial;
@@ -5,7 +7,7 @@ public class RomInfo {
     private final String languages;
     private final String name;
 
-    RomInfo(String se, String re, String lan, String n){
+    public RomInfo(String se, String re, String lan, String n){
         this.serial = se;
         this.region = re;
         this.languages = lan;

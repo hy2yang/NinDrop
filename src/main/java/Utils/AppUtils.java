@@ -1,10 +1,13 @@
+package Utils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import spark.Request;
 
-import java.awt.*;
+
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,13 +18,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class Utils {
+import static Utils.BackConfig.DEFAULT_PORT;
+
+public class AppUtils {
+
     static ObjectMapper mapper;
-    private static final int DEFAULT_PORT = 10233;
     private static final String CTR = "4354522D";
     private static final String GUION = "2D";
     private static final String NCCH = "4E434348";
-
 
     static {
         mapper = new ObjectMapper();
@@ -29,7 +33,7 @@ public class Utils {
         //mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
-    static void printReqDetails(Request req) {
+    public static void printReqDetails(Request req) {
         System.out.println("----------------------------------------------");
         System.out.println(req.requestMethod());
         System.out.println(req.pathInfo());
@@ -40,7 +44,7 @@ public class Utils {
 
     }
 
-    static String getJson(Object o){
+    public static String getJson(Object o){
         try {
             return mapper.writeValueAsString(o);
         } catch (JsonProcessingException e) {
@@ -49,7 +53,7 @@ public class Utils {
         }
     }
 
-    static int getPortFromKeyboard(){
+    public static int getPortFromKeyboard(){
         Scanner keyboardIn = new Scanner(System.in);
         System.out.println("enter an integer (1023-65535) to specify service port");
         int pnum = keyboardIn.nextInt();
@@ -61,7 +65,7 @@ public class Utils {
         return pnum;
     }
 
-    static void openBrowser(String url){
+    public static void openBrowser(String url){
         if(Desktop.isDesktopSupported()){
             Desktop desktop = Desktop.getDesktop();
             try {
@@ -97,7 +101,7 @@ public class Utils {
         }
     }
 
-    static String getSerialFromRom(File file){
+    public static String getSerialFromRom(File file){
         String serial = "";
 
         RandomAccessFile raf = null;
@@ -155,6 +159,20 @@ public class Utils {
         HashMap<String,Object> bodyMap = new HashMap<>();
         mapper.readValue(json, new TypeReference<HashMap<String,Object>>() {});
         return bodyMap;
+    }
+
+    public boolean isFileExetensionValid(File f){
+        String fileName = f.getName();
+        int i = fileName.lastIndexOf('.');
+
+        String fileExtension;
+
+        if (i != -1) {
+            fileExtension = fileName.substring(i+1);
+            return BackConfig.isExtensionValid(fileExtension);
+        }
+
+        return false;
     }
 
 

@@ -1,3 +1,8 @@
+package Model;
+
+import Utils.AppUtils;
+import Utils.RomInfoFinder;
+
 import java.io.File;
 import java.util.Objects;
 
@@ -15,14 +20,13 @@ public class DetailedRom {
     static{
         romInfoFinder = new RomInfoFinder();
     }
-    
-    DetailedRom(File file){
+
+    public DetailedRom(File file){
         this.file = file;
-        this.serial = Utils.getSerialFromRom(file);
+        this.serial = AppUtils.getSerialFromRom(file);
         this.size = file.length();
         this.fileName = file.getName();
         this.romInfo = findDetailedInfo(this.serial);
-
     }
 
     private RomInfo findDetailedInfo(String serial) {
@@ -35,7 +39,9 @@ public class DetailedRom {
     RomInfo getFileInfo(){
         return this.romInfo;
     }
-    File getFile(){ return this.file;}
+
+    public File getFile(){ return this.file;}
+
     public RomInfo getRomInfo() {
         return romInfo;
     }
